@@ -1,0 +1,135 @@
+---
+title: "Kelton 4.10.14 Simulation"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Build Simio models to confirm and cross-check the steady-state queuing-theoretic results for the specified queuing models in Section 2.3.
+
+$Wq$ steady-state average time in queue
+
+$W$ steady-state average time in system
+
+$Lq$ steady state entities in queue
+
+$L$ steady-state entities in system
+
+$\rho$ steady state utilization or server or group of parallel identical servers
+
+
+## 14.a. M/M/1 queue
+
+M/M/1, Simulation with one server
+
+Using mmc.exe, input lambda, mu, c: 1, 1.11111111, 1
+
+Arrival rate <br>
+$\lambda=1$ arrivals per minute
+
+Service rate <br>
+$\mu = 1.111111111$ entities per minute
+
+Servers <br>
+1
+
+![M/M/1 calculations](mmc1.jpg)
+
+#### Results:<br>
+Utilization <br>
+$\rho=0.90000$
+$p(0)= 0.10000$
+
+NumInSystem <br>
+$L = 9.0000$
+
+NumInQueue<br>
+$Lq = 8.1000$
+
+TimeInSystem<br>
+$W = 9.0000$
+
+TimeInQueue <br>
+$Wq = 8.1000$
+
+
+
+
+![M/M/1 calculations](mm1model.jpg)
+
+![M/M/1 calculations](mm1source1.jpg)
+
+![M/M/1 calculations](mm1server1.jpg)
+
+
+![M/M/4 simulation results](mm1results1.jpg)
+
+![M/M/4 simulation results](mm1results2.jpg)
+
+---
+
+
+## 14.b. M/M/4 queue
+
+M/M/4, Simulation with four servers
+
+Arrival rate <br>
+$\lambda=2.4$ arrivals per minute
+
+Service rate <br>
+$\mu=0.7$ entities per minute
+
+Servers <br>
+4
+
+Using mmc.exe, input lambda, mu, c: 2.4, 0.7, 4<br>
+
+![M/M/4 calculations](mmc2.jpg)
+
+#### Results:<br>
+
+
+Utilization <br>
+$\rho=0.85714$
+$p(0)=0.01744$
+
+NumInSystem <br>
+$L = 7.6468$
+
+NumInQueue<br>
+$Lq = 4.2183$
+
+TimeInSystem<br>
+$W = 3.1862$
+
+TimeInQueue <br>
+$Wq = 1.7576$
+
+
+
+
+
+
+
+![M/M/4 model](model1.jpg)
+
+
+
+![M/M/4 source](source1.jpg)
+
+![M/M/4 node](node1.jpg)
+
+![M/M/4 server](server1.jpg)
+
+![M/M/4 simulation results](results1.jpg)
+
+![M/M/4 simulation results](results2.jpg)
+
+
+The simulations ran for 24 hours.<br>
+The resulting statistics were similar to the calculated values. No start up time was used, but including a start up time may have resulted in more accurate results.
