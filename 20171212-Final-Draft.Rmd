@@ -1,0 +1,300 @@
+---
+title: "Sanitation Modeling With Simio"
+author: "Armenoush Aslanian-Persico, Puneet Auluck"
+date: "December 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align="left")
+```
+
+
+### I. Background, Purpose, and Significance
+
+<p>
+<a href="http://www1.nyc.gov/assets/dsny/about/inside-dsny.shtml">The New York City Department of Sanitation</a> is responsible for collecting residential garbage. The volume of collection is significant, at over 12,000 tons of trash per day. This includes 10,500 tons of refuse which ends up in landfills, and nearly 2,000 tons of recyclables including metal, plastic, glass, and organics. Nearly 10,000 employees work for DSNY, and the agency uses over 6,000 vehicles to accomplish its work. 
+</p>
+
+<p>
+![<b>Recycling Collection, Manhattan</b> / Credit: Armenoush Aslanian-Persico](photo3.jpg)
+
+</p>
+
+<p>
+<a href="http://www1.nyc.gov/assets/dsny/zerowaste/residents.shtml">The city's plan for waste management is called "0X30,"</a> which aims to have zero waste going to landfill by the year 2030. This will require a reduction of materials in manufacturing processes, reuse of discarded items, and recycling of all materials at the end of their life cycle. Simulating collection and disposal of different types of waste can be helpful in calculating the feasibility of these sustainability goals.
+</p>
+
+<p>
+There are complex challenges in this citywide operation, including scheduling, resource management, workflows, and obstacles preventing collection. We used Simio software to model the collection process. To facilitate modeling, we chose to represent a few select sub-processes, and consolidated entities and servers. Our goal was to investigate some of the factors affecting timely collection, and to simulate variability in different sub-processes. We also wanted to test different ratios of recycling and refuse to determine the effects on the overall system.
+</p>
+
+### II. Industry Research
+
+<p>
+We reviewed several peer-reviewed journal articles to provide background and insight on the garbage collection process. 
+</p>
+
+<p>
+![<b>Recycling Transfer Station, Brooklyn</b> / Credit: Armenoush Aslanian-Persico](photo2.jpg)
+
+</p>
+
+
+### III. Structure and Process Diagrams
+
+<p>
+We began by choosing entities, modeling the workflow and creating a corresponding facility model. Each entity moving through the model represents a bag of garbage, with an average weight of 30 pounds. 
+</p>
+
+
+<p>
+![<b>Workflow</b>](flowchart1.jpg) 
+
+</p>
+
+<p>
+![<b>Initialized Facility Model</b>](img-facility1.jpg)  
+
+</p>
+
+<p>
+<b>Entities:</b>
+</p>
+
+<p>
+1. <b>Refuse</b>: "regular" trash, which cannot be recycled and ends up in landfill.
+</p>
+
+<p>
+2. <b>Recycling</b>: this represents metal, glass, plastic, paper, and cardboard. In New York City, metal, glass and plastic are bagged and collected together, and paper and cardboard are similarly grouped. These two categories of recycling are picked up in the same collection visit, but are kept separate and dumped separately. For the purposes of this model, all recycling is treated as one entity type.
+</p>
+
+<p>
+3. <b>Organics</b>: this is food and plant material, collected by the resident in a special bin. The city converts this material to compost and uses it to provide soil for city parks and gardens. Organics collection began recently in select neighborhoods and will be rolled out to all of New York City by the end of 2018.
+</p>
+
+<p>
+<b>Objects:</b>
+</p>
+
+<p>
+1. <b>Curbside</b>. The facility model begins with a source at the street curb (SrcCurbside), to indicate curbside collection. The curbside source represents residents placing their trash in bags at the curb.
+<br><br>
+1a. The curbside source has an exit node for two possible choices: collected or missed. Due to emergencies, unplanned backups, or weather, a planned collection may be missed on a given day. Entities not picked up move to the missed server (SrvMissed). Entities scheduled for pickup move to the inspection server (SrvInspection).
+</p>
+
+<p>
+2. <b>Inspection</b>. Next is the server for inspection (SrvInspection). The inspection server represents the inspection process performed by sanitation workers on collection day. If a bag is found to be in violation of sanitation rules, such as refuse containing recyclables, bag weight over the allowable maximum, or improper bagging or location, it will not be picked up. 
+<br><br>
+2a. The inspection server has an exit node for two possible choices: pass or fail inspection. 
+</p>
+
+<p>
+3. <b>Collection</b>. Entities that pass inspection will move to the collection server (SrvCollection). 
+</p>
+
+<p>
+4. <b>Violation</b>. Entities that fail inspection will move to the violation server (SrvViolation).
+</p>
+
+<p>
+5. <b>Dump</b>.After the collection server, entities proceed to the dump site (SnkDumpSite). This dump site is a representation of multiple types of dump sites for different entity types. 
+</p>
+
+<p>
+6. <b>Workers</b>. A worker object moves between curbside, inspection, and collection. This represents one or more sanitation workers needed to perform inspection and collection. 
+
+![<b>Worker Setup</b>](table-worker.jpg)
+
+</p>
+
+<p>
+7. <b>Vehicles</b>. A vehicle object moves between collection and the dump site. This represents a collection truck with a limited capacity which needs to be emptied periodically at the dump before proceeding to the next collection.
+
+![<b>Vehicle Setup</b>](table-vehicle.jpg)
+
+</p>
+
+
+### IV. Model Flowcharts
+
+
+####<b>Arrival Logic</b>
+
+1. <b>Run Times</b>
+
+Based on our knowledge of New York City trash pickup, we chose to simulate a 5-hour segment of a route. DSNY routes pick up 24 hours a day, 7 days a week, for different types of routes. Most full routes are 4-8 hours, with setup and cleanup time, and breaks for meals. We chose a limited time window as a snapshot of the process and to not overwhelm the model processing. 
+
+2. <b>Entity Mixes</b>
+
+For our initial model, we chose a mix of 70% refuse, 20% recycling, and 10% organic waste. This is loosely based on reality. Currently, slightly less than 20% of collected material is recyclables. Organic collection is not yet at 10%. We tried various entity mixes via our model experiments. 
+
+![<b>Entity Mix Setup</b>](table-mix.jpg)  
+
+
+3. <b>Link Weights</b>
+
+
+<p>
+<b>SrcCurbside:</b> From the curbside source, 95% of entities begin the collection process. The remaining 5% are missed collections. Missed collections may happen due to severe weather, but are otherwise rare. This split is represented via path link weights of 0.95 and 0.05.
+</p>
+
+<p>
+<b>SrvMissedComplaint:</b> At the missed collection server, 90% of missed collections are scheduled for collection within the given time frame. The remaining 10% move to the Not Collected sink. This split is represented via path link weights of 0.90 and 0.10.
+</p>
+
+<p>
+<b>SrvInspection:</b> At the inspection server, 90% of entities pass inspection and proceed to collection. The remaining 10% are in violation of disposal rules and move to the violation server. This split is represented via path link weights of 0.90 and 0.10.
+</p>
+
+<p>
+<b>SrvViolation:</b> Entities passing through the violation server which have their violations corrected return to the inspection server for the subsequent round of collection. This represents 60% of violations. The remaining 40% of violations are never corrected within the given time frame, and those entities move to the Not Collected sink. This split is represented via path link weights of 0.60 and 0.40.
+</p>
+
+<p>
+All entities passing through the collection server proceed to the dump sink.
+</p>
+
+<p>
+4. <b>Arrival Distributions</b>
+</p>
+
+<p>
+By working backwards from total expected amounts, we determined reasonable distributions and arrival times at our source and servers.
+</p>
+
+<p>
+<b>SrcCurbside:</b> Our source arrival distribution is Random.Exponential(0.5). We expected that in a 4-hour shift, bags would become available for pickup at an average of one bag every 30 seconds. We chose an exponential distribution as we determined that a majority of bags would be available in 30 seconds or less.
+</p>
+
+<p>
+<b>SrvInspection:</b> Our inspection server processing distribution is Random.Triangular(0.3, 0.5, 1). We determined that an inspection takes approximately 30 seconds per entity.
+</p>
+
+<p>
+<b>SrvCollection:</b> Our collection server processing distribution is Random.Triangular(0.1, 0.2, 0.3). We determined that a realistic collection occurs at an average rate of 5 bags per minute, with some collection happening more or less frequently, but without a significant distribution tail. This includes time used by the workers to travel between the physical bag location at curbside and the collection vehicle usually in the street.
+</p>
+
+<p>
+<b>SrvViolation:</b> Our violation server processing distribution is Random.Triangular(1, 2, 3). We determined that a violation takes an average of 2 minutes to issue, as this normally requires a sanitation employee to write a ticket. 
+</p>
+
+<p>
+<b>SrvMissedComplaint:</b> Our missed-complaint server processing distribution is Random.Triangular(10, 30, 60). Missed collection may realistically take up to several hours to be reported by a resident, but for the purposes of our four-hour model we condensed this to a maximum of a one-hour time period.
+</p>
+
+
+####<b>Elements</b>
+
+
+<p>
+1. We used State Statistic Elements to count the total number of entities classified into four categories: missed, in violation, collected, and not collected.
+</p>
+
+<p>
+2. We used Tally Statistic Elements to report a more detailed breakdown of those categories by entity type. For example, this allowed us to see the count of missed refuse bags versus missed organic bags.
+</p>
+
+![<b>Elements</b>](elements.jpg)
+
+
+
+####<b>Add-On Processes</b>
+
+<br>
+We created Add-On Processes to collect the Tally information for entities passing through the model. The Tally Statistic Name for each process references the corresponding Tally Statistic Element in the Bag Table.
+<br>
+
+![<b>Add-On Processes</b>](addon.jpg)
+
+</p>
+
+### V. Verification and Validation
+
+<p>
+To verify our setup, we ran the model and observed the animation to confirm that objects were flowing correctly through the system. We observed the worker moving between the curbside source, inspection server, and collection server as planned. We observed the vehicle moving between the collection server, weigh station server, and dump sink as planned.
+</p>
+
+<p>
+To validate our model, we inspected the distribution of source and sink entities. We expected that a mix of 70% refuse, 20% recycling, and 10% organics would result in similar proportions at the end of our process. In this assessment we also accounted for the multiple decision paths taken by the entities, and the two possible sinks.
+</p>
+
+<p>
+In a four-hour shift with entities arriving at 2 bags per minute, we calculated that the total number of bags collected by the end of the shift should be about 480. Two bags per minute would scale to 120 bags per hour and 480 bags per 4 hours. Our results validated this calculation. 
+</p>
+
+
+### VI. Detail the results of the status quo and interventional models, discussing appropriate statistics for relevant variables.
+
+
+####<b>Experiments</b>
+
+<p>
+We created several scenarios within an experiment to determine the results of changes in entity and worker mixes. All experiments ran for four hours.
+</p>
+
+![<b>Experiment Setup</b>](experiments.jpg)  
+
+
+1. The status quo model used 1 worker and had a refuse/recycling/organics mix of 70/20/10.
+
+2. The first interventional model used 2 workers with a 70/20/10 entity mix.
+
+3. The second interventional model used 2 workers with a 60/30/10 entity mix.
+
+4. The third interventional model used 2 workers with a 50/30/20 entity mix.
+
+
+####<b>Results</b>
+
+<p>
+We collected the following results:
+</p>
+
+<p>
+
+![<b>Initialized Facility Model</b>](img-exp1.jpg)  
+
+</p>
+
+<p>
+Comparison of: Processing time; tally statistics; utilization
+</p>
+
+### VII. Statistical Comparison of Models
+
+Chi-squared distribution test ?
+<br>
+<br>
+T-test ?
+
+### VIII. Conclusions and Modeling Lessons Learned
+<br>
+
+![<b>Container Collection, Manhattan</b> / Credit: Armenoush Aslanian-Persico](photo1.jpg)
+
+
+In developing our model we encountered some challenges both conceptually and technically. To allow the model to run, we made the following design decisions.
+
+1. Removed sequence tables in favor of paths. While verifying our model, we noticed incorrect behavior by the worker object. This was resolved by switching to path travel.
+
+2. Simplified loop processes without decision nodes, and collapsed multiple servers. A sequence of multiple servers may be functionally unnecessary if no other intermediate activity is represented.
+
+3. Consolidated entity types. As previously mentioned, multiple types of recycling materials were represented as the same entity. This allowed a narrower focus.
+
+4. Compressed the workday to a representative time frame. While collection can be modeled over the course of a year, we sampled a four-hour segment of a collection route to achieve a manageable report.
+
+5. Compressed the physical space represented. Our model simulated one continuous city block of residences, while a realistic route is more complex and not continuous.
+
+### IX. Simulation Model File
+
+Our Simio file is available here on Github.
+
+### X. Presenter Slides
+
+A presenter slide deck is available here on RPubs.
+
+### Appendix A. Sources
