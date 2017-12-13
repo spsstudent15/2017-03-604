@@ -1,0 +1,7 @@
+Scenario,Object Type,Object Name,Data Item,Statistic Type,Average,NumberOfWorkers,BagInterarrivalTime(Minutes)
+Scenario1,Worker,SanitationWorker[1],UnitsUtilized,Average,47.0%,1,Random.Exponential(0.5)
+Scenario2,Worker,SanitationWorker[1],UnitsUtilized,Average,47.0%,1,Random.Exponential(0.2)
+Scenario3,Worker,SanitationWorker[1],UnitsUtilized,Average,39.9%,2,Random.Exponential(0.5)
+Scenario3,Worker,SanitationWorker[2],UnitsUtilized,Average,26.4%,2,Random.Exponential(0.5)
+Scenario4,Worker,SanitationWorker[1],UnitsUtilized,Average,40.2%,2,Random.Exponential(0.5)
+Scenario4,Worker,SanitationWorker[2],UnitsUtilized,Average,26.5%,2,Random.Exponential(0.5)
